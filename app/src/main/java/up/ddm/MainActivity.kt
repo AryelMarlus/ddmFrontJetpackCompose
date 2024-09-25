@@ -27,19 +27,36 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import up.ddm.data.AtributosDAO
+import up.ddm.data.AtributosDB
 
 class MainActivity : ComponentActivity() {
     private var atributos = Atributos()
+    private lateinit var atributosDAO: AtributosDAO
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val db = AtributosDB.getDatabase(this)
+        atributosDAO = db.atributosDAO()
+
         setContent {
-            AtributosScreen(atributos)
+            AtributosScreen(atributos) {
+                saveAtributos()
+            }
+        }
+    }
+
+    private fun saveAtributos() {
+        lifecycleScope.launch {
+            atributosDAO.insert(atributos)
         }
     }
 }
 
 @Composable
-fun AtributosScreen(atributos: Atributos) {
+fun AtributosScreen(atributos: Atributos, saveClick: () -> Unit) {
     var pontosRestantes by remember { mutableStateOf(atributos.getPontosDisponiveis()) }
     var snackbarVisible by remember { mutableStateOf(false) }
     var snackbarMessage by remember { mutableStateOf("") }
@@ -70,25 +87,61 @@ fun AtributosScreen(atributos: Atributos) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(text = "Atributo", modifier = Modifier.weight(1f))
-            Text(text = "Valor", modifier = Modifier.weight(1f), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
-            Text(text = "Raça", modifier = Modifier.weight(1f), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
-            Text(text = "Mod", modifier = Modifier.weight(1f), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+            Text(
+                text = "Valor",
+                modifier = Modifier.weight(1f),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+            Text(
+                text = "Raça",
+                modifier = Modifier.weight(1f),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+            Text(
+                text = "Mod",
+                modifier = Modifier.weight(1f),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
         // Atributos com colunas adicionais
-        AtributoInputRow("Força", atributos, { pontosRestantes = atributos.getPontosDisponiveis() }, { showMessage(it, { snackbarMessage = it; snackbarVisible = true }) })
+        AtributoInputRow(
+            "Força",
+            atributos,
+            { pontosRestantes = atributos.getPontosDisponiveis() },
+            { showMessage(it, { snackbarMessage = it; snackbarVisible = true }) })
         Spacer(modifier = Modifier.height(8.dp))
-        AtributoInputRow("Destreza", atributos, { pontosRestantes = atributos.getPontosDisponiveis() }, { showMessage(it, { snackbarMessage = it; snackbarVisible = true }) })
+        AtributoInputRow(
+            "Destreza",
+            atributos,
+            { pontosRestantes = atributos.getPontosDisponiveis() },
+            { showMessage(it, { snackbarMessage = it; snackbarVisible = true }) })
         Spacer(modifier = Modifier.height(8.dp))
-        AtributoInputRow("Constituição", atributos, { pontosRestantes = atributos.getPontosDisponiveis() }, { showMessage(it, { snackbarMessage = it; snackbarVisible = true }) })
+        AtributoInputRow(
+            "Constituição",
+            atributos,
+            { pontosRestantes = atributos.getPontosDisponiveis() },
+            { showMessage(it, { snackbarMessage = it; snackbarVisible = true }) })
         Spacer(modifier = Modifier.height(8.dp))
-        AtributoInputRow("Sabedoria", atributos, { pontosRestantes = atributos.getPontosDisponiveis() }, { showMessage(it, { snackbarMessage = it; snackbarVisible = true }) })
+        AtributoInputRow(
+            "Sabedoria",
+            atributos,
+            { pontosRestantes = atributos.getPontosDisponiveis() },
+            { showMessage(it, { snackbarMessage = it; snackbarVisible = true }) })
         Spacer(modifier = Modifier.height(8.dp))
-        AtributoInputRow("Inteligência", atributos, { pontosRestantes = atributos.getPontosDisponiveis() }, { showMessage(it, { snackbarMessage = it; snackbarVisible = true }) })
+        AtributoInputRow(
+            "Inteligência",
+            atributos,
+            { pontosRestantes = atributos.getPontosDisponiveis() },
+            { showMessage(it, { snackbarMessage = it; snackbarVisible = true }) })
         Spacer(modifier = Modifier.height(8.dp))
-        AtributoInputRow("Carisma", atributos, { pontosRestantes = atributos.getPontosDisponiveis() }, { showMessage(it, { snackbarMessage = it; snackbarVisible = true }) })
+        AtributoInputRow(
+            "Carisma",
+            atributos,
+            { pontosRestantes = atributos.getPontosDisponiveis() },
+            { showMessage(it, { snackbarMessage = it; snackbarVisible = true }) })
 
         if (snackbarVisible) {
             Snackbar(
@@ -102,11 +155,21 @@ fun AtributosScreen(atributos: Atributos) {
                 Text(snackbarMessage)
             }
         }
+
+        Button(onClick = saveClick) {
+            Text("Salvar atributos")
+        }
+
     }
 }
 
 @Composable
-fun AtributoInputRow(label: String, atributos: Atributos, updatePontos: () -> Unit, onError: (String) -> Unit) {
+fun AtributoInputRow(
+    label: String,
+    atributos: Atributos,
+    updatePontos: () -> Unit,
+    onError: (String) -> Unit
+) {
     var textValue by remember { mutableStateOf("") }
 
     Row(
@@ -150,10 +213,26 @@ fun AtributoInputRow(label: String, atributos: Atributos, updatePontos: () -> Un
         )
 
         // Coluna Bônus de Raça
-        Text(text = "0", modifier = Modifier.weight(1f), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+        Text(
+            text = "0",
+            modifier = Modifier.weight(1f),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
 
         // Coluna Mod
-        Text(text = "0", modifier = Modifier.weight(1f), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+        Text(
+            text = "0",
+            modifier = Modifier.weight(1f),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+    }
+}
+
+@Composable
+fun FilledButtonPersistencia(onClick: () -> Unit) {
+    Button(onClick = { onClick() }) {
+        Text("Persistência")
+
     }
 }
 

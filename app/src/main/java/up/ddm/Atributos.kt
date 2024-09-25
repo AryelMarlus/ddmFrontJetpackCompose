@@ -1,6 +1,13 @@
 package up.ddm
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "atributos")
 class Atributos {
+    @PrimaryKey(autoGenerate = true)
+    var id: Int = 0
+
     var pontos = 27
 
     fun setAtributo(atributo: Int) {
@@ -17,6 +24,4 @@ class Atributos {
     fun getPontosDisponiveis(): Int {
         return pontos
     }
-
-
 }

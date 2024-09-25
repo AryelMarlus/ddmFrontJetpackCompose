@@ -1,11 +1,16 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.compose.compiler)
+    id("androidx.room")
+    id("com.google.devtools.ksp")
+    id("kotlin-kapt")
+
 }
 
 android {
     namespace = "up.ddm"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "up.ddm"
@@ -18,6 +23,10 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        //diretório de schemas do room
+        room {
+            schemaDirectory("$projectDir/schemas")
+        }
     }
 
     buildTypes {
@@ -29,10 +38,7 @@ android {
             )
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
+
     kotlinOptions {
         jvmTarget = "1.8"
     }
@@ -47,9 +53,20 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
 }
 
 dependencies {
+    //room dependencias
+    val room_version = "2.6.1"
+    implementation("androidx.room:room-runtime:$room_version")
+    annotationProcessor("androidx.room:room-compiler:$room_version")
+    ksp("androidx.room:room-compiler:$room_version")
+    implementation("androidx.room:room-ktx:$room_version")
+
+//    inclusao automatica do android studio para room
+//    implementation(libs.androidx.room.common)
+//    implementation(libs.androidx.room.ktx)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
