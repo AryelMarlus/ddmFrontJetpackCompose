@@ -31,20 +31,25 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import up.ddm.data.AtributosDAO
 import up.ddm.data.AtributosDB
+import up.ddm.data.PersonagemDAO
 
 class MainActivity : ComponentActivity() {
     private var atributos = Atributos()
+    private var personagem = Personagem()
+
     private lateinit var atributosDAO: AtributosDAO
+    private lateinit var personagemDAO: PersonagemDAO
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        personagem.atributosId = 1
         val db = AtributosDB.getDatabase(this)
         atributosDAO = db.atributosDAO()
+        personagemDAO = db.personagemDAO()
+        personagem.nome = "Bruenor"
 
         setContent {
-            AtributosScreen(atributos) {
-                saveAtributos()
-            }
+            AtributosScreen(atributos, personagem, ::saveAtributos, ::deletePersonagem, ::salvarPersonagem)
         }
     }
 
@@ -53,10 +58,29 @@ class MainActivity : ComponentActivity() {
             atributosDAO.insert(atributos)
         }
     }
+
+    private fun deletePersonagem() {
+        lifecycleScope.launch {
+            personagemDAO.delete(personagem)
+        }
+    }
+
+    private fun salvarPersonagem() {
+        lifecycleScope.launch {
+            personagemDAO.insert(personagem)
+        }
+    }
+
 }
 
 @Composable
-fun AtributosScreen(atributos: Atributos, saveClick: () -> Unit) {
+fun AtributosScreen(
+    atributos: Atributos,
+    personagem: Personagem,
+    saveClick: () -> Unit,
+    deleteClick: () -> Unit,
+    salvarClick: () -> Unit
+) {
     var pontosRestantes by remember { mutableStateOf(atributos.getPontosDisponiveis()) }
     var snackbarVisible by remember { mutableStateOf(false) }
     var snackbarMessage by remember { mutableStateOf("") }
@@ -160,6 +184,15 @@ fun AtributosScreen(atributos: Atributos, saveClick: () -> Unit) {
             Text("Salvar atributos")
         }
 
+
+        Button(onClick = salvarClick, Modifier.align(Alignment.CenterHorizontally)) {
+            Text("Salvar Personagem")
+        }
+
+
+        Button(onClick = deleteClick, Modifier.align(Alignment.CenterHorizontally)) {
+            Text("Deletar Personagem")
+        }
     }
 }
 

@@ -5,11 +5,13 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import up.ddm.Atributos
+import up.ddm.Personagem
 
-@Database(entities = [Atributos::class], version = 1, exportSchema = false)
+@Database(entities = [Atributos::class, Personagem::class], version = 2, exportSchema = false)
 abstract class AtributosDB: RoomDatabase() {
 
     abstract fun atributosDAO(): AtributosDAO
+    abstract fun personagemDAO(): PersonagemDAO
 
     companion object{
 
@@ -22,7 +24,7 @@ abstract class AtributosDB: RoomDatabase() {
                     context.applicationContext,
                     AtributosDB::class.java,
                     "atributosDB"
-                ).build()
+                ).fallbackToDestructiveMigration().build()
                 INSTANCIA = instancia
                 return instancia
             }

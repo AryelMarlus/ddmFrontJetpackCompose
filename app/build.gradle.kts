@@ -66,7 +66,7 @@ dependencies {
 
 //    inclusao automatica do android studio para room
 //    implementation(libs.androidx.room.common)
-//    implementation(libs.androidx.room.ktx)
+//    implementation(libs.androidx.room.kapt)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
