@@ -17,7 +17,4 @@ interface PersonagemDAO {
 
     @Delete
     suspend fun delete(personagem: Personagem)
-
-
-
 }

@@ -10,6 +10,8 @@ class Atributos {
 
     var pontos = 27
 
+
+
     fun setAtributo(atributo: Int) {
         if(atributo.toInt() < 8 || atributo.toInt() > 15)
             throw IllegalArgumentException("Valor deve estar entre 8 e 15")
