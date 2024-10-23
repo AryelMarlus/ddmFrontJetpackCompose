@@ -3,6 +3,7 @@ package up.ddm
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -58,21 +59,18 @@ class MainActivity : ComponentActivity() {
         atributosDAO = db.atributosDAO()
         personagemDAO = db.personagemDAO()
 
-        createNotificationChannel()
+
         showNotification()
 
+
         setContent {
-            AtributosScreen(atributos, personagem, ::saveAtributos, ::deletePersonagem, ::salvarPersonagem)
+            AtributosScreen(atributos, personagem, ::saveAtributos, ::deletePersonagem, ::salvarPersonagem, ::iniciarService)
         }
     }
 
-    private fun createNotificationChannel() {
 
-    }
 
     private fun showNotification() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is not in the Support Library.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = "Canal de Notificações"
             val descriptionText = "Descrição da notificação"
@@ -80,19 +78,15 @@ class MainActivity : ComponentActivity() {
             val channel = NotificationChannel("channel_id", name, importance).apply {
                 description = descriptionText
             }
-            // Register the channel with the system.
             val notificationManager: NotificationManager =
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
-
-            // Cria a notificação usando NotificationCompat.Builder
             val builder = NotificationCompat.Builder(this, "channel_id")
                 .setSmallIcon(R.drawable.ic_launcher_background) // ícone
                 .setContentTitle("Dungeons and Dragons")
                 .setContentText("Crie seu personagem")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true)
-
             notificationManager.notify(1, builder.build())
 
         }
@@ -117,6 +111,11 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun iniciarService(){
+        val serviceIntent = Intent(this, ServiceSimples::class.java)
+        startService(serviceIntent)
+
+    }
 }
 
 @Composable
@@ -125,7 +124,8 @@ fun AtributosScreen(
     personagem: Personagem,
     saveClick: () -> Unit,
     deleteClick: () -> Unit,
-    salvarClick: () -> Unit
+    salvarClick: () -> Unit,
+    iniciarService: () -> Unit
 ) {
     var pontosRestantes by remember { mutableStateOf(atributos.getPontosDisponiveis()) }
     var snackbarVisible by remember { mutableStateOf(false) }
@@ -238,6 +238,9 @@ fun AtributosScreen(
 
         Button(onClick = deleteClick, Modifier.align(Alignment.CenterHorizontally)) {
             Text("Deletar Personagem")
+        }
+        Button(onClick = iniciarService, Modifier.align(Alignment.CenterHorizontally)) {
+            Text("Iniciar service")
         }
     }
 }
